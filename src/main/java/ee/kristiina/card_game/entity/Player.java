@@ -1,15 +1,13 @@
 package ee.kristiina.card_game.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.awt.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Player {
     @Id
@@ -17,5 +15,15 @@ public class Player {
     private Long id;
     private String firstName;
     private String lastName;
+
+    //@OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    //private List<GameResult> games;
+
+    public Player() {}
+
+    public Player(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
 }

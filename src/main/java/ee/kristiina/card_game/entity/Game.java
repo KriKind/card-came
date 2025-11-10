@@ -14,5 +14,6 @@ public class Game {
     private int lives;
     private List<Card> deck;
     private boolean gameOver;
-
+    private long startTime;  // 💡 algusaeg
+    private long duration;   // 💡 kestus millisekundites
 }

@@ -2,8 +2,15 @@ package ee.kristiina.card_game.service;
 
 import ee.kristiina.card_game.entity.Card;
 import ee.kristiina.card_game.entity.Game;
+import ee.kristiina.card_game.entity.GameResult;
+import ee.kristiina.card_game.entity.Player;
+import ee.kristiina.card_game.repository.GameResultRepository;
+import ee.kristiina.card_game.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +18,23 @@ import java.util.List;
 @Service
 public class GameService {
 
-    private Game game;
+    private final PlayerRepository playerRepository;
+    private final GameResultRepository gameResultRepository;
 
-    public Game startGame() {
+    private Game game;
+    private Player currentPlayer;
+
+    public GameService(PlayerRepository playerRepository, GameResultRepository gameResultRepository) {
+        this.playerRepository = playerRepository;
+        this.gameResultRepository = gameResultRepository;
+    }
+    public Player registerPlayer(String firstName, String lastName) {
+        return playerRepository.findByFirstNameAndLastName(firstName, lastName)
+                .orElseGet(() -> playerRepository.save(new Player(firstName, lastName)));
+    }
+    public Game startGame(String firstName, String lastName) {
+        this.currentPlayer = registerPlayer(firstName, lastName);
+
         if (game == null || game.isGameOver()) {
             game = new Game();
             game.setDeck(createShuffledDeck());
@@ -21,8 +42,8 @@ public class GameService {
             game.setCorrectAnswers(0);
             game.setGameOver(false);
             game.setBaseCard(drawCard());
+            game.setStartTime(System.currentTimeMillis());
         }
-
         return game;
     }
 
@@ -34,7 +55,7 @@ public class GameService {
         for (String suit : suits) {
             for (String rank : ranks) {
                 int value;
-                if (rank.matches("[0-9]+")) value = Integer.parseInt(rank);
+                if (rank.matches("\\d+")) value = Integer.parseInt(rank);
                 else value = 10;
                 deck.add(new Card(suit,rank,value));
             }
@@ -44,13 +65,15 @@ public class GameService {
         return deck;
     };
 
-    public Game makeGuess(String action) {
-        if (game == null || game.isGameOver()) {
-            throw  new RuntimeException("Game is not started or already over");
+    public Game makeGuess(String action)  {
+        if (game == null) {
+            throw  new IllegalStateException("Game not started. Start the game!!");
         }
-
+        if (game.isGameOver()) {
+            throw  new IllegalStateException("Game is over. Please try again later.");
+        }
         if (game.getDeck().isEmpty()){
-            game.setGameOver(true);
+            endGame();
             return game;
         }
 
@@ -62,7 +85,7 @@ public class GameService {
         }else  {
             game.setLives(game.getLives() - 1);
             if (game.getLives() <= 0) {
-                game.setGameOver(true);
+                endGame();
             }
         }
 
@@ -79,7 +102,28 @@ public class GameService {
         };
     }
 
+    private void endGame() {
+        game.setGameOver(true);
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - game.getStartTime();
+        game.setDuration(duration);
+        System.out.println("Mäng kestis: " + (duration / 1000.0) + " sekundit");
+
+        if (currentPlayer != null) {
+            GameResult result = new GameResult();
+            result.setPlayer(currentPlayer);
+            result.setCorrectAnswers(game.getCorrectAnswers());
+            result.setDurationOfPlay(duration);
+            result.setStartTime(LocalDateTime.now());
+            System.out.println(result);
+            gameResultRepository.save(result);
+        }
+    }
+
     private Card drawCard() {
+        if (game.getDeck().isEmpty()) {
+            throw  new IllegalStateException("Deck is empty");
+        }
         return game.getDeck().removeFirst();
     }
 }

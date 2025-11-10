@@ -1,26 +1,33 @@
 package ee.kristiina.card_game.entity;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.Date;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Entity
 public class GameResult {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    private Player player;
-    int correctAnswers;
-    float timeOfPlay;
 
+    private int correctAnswers;
+    private long durationOfPlay;
+    private LocalDateTime startTime;
+
+    @ManyToOne
+    //@JoinColumn(name = "player_id")
+    private Player player;
+
+//    public GameResult() {}
+//
+//    public GameResult(Player player, int correctAnswers, long durationOfPlay) {
+//        this.player = player;
+//        this.correctAnswers = correctAnswers;
+//        this.durationOfPlay = durationOfPlay;
+//        this.startTime = LocalDateTime.now();
+//    }
 }
