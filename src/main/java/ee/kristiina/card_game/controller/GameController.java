@@ -1,5 +1,6 @@
 package ee.kristiina.card_game.controller;
 
+import ee.kristiina.card_game.entity.Card;
 import ee.kristiina.card_game.entity.Game;
 import ee.kristiina.card_game.entity.GameResult;
 import ee.kristiina.card_game.repository.GameResultRepository;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.awt.*;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/game")
 public class GameController {
@@ -28,6 +30,11 @@ public class GameController {
         return gameService.startGame(firstName, lastName);
     }
 
+    @GetMapping("getGame")
+    public Game getGame(@RequestParam String firstName, @RequestParam String lastName) {
+        return gameService.startGame(firstName, lastName);
+    }
+
     @PostMapping("/guess")
     public Game makeGuess(@RequestParam String action) {
         return gameService.makeGuess(action);
@@ -37,4 +44,9 @@ public class GameController {
     public List<GameResult> getGameResult() {
         return gameResultRepository.findAll();
     }
+
+//    @GetMapping
+//    public List<Card> getCards() {
+//        return
+//    }
 }

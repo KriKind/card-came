@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GameService {
@@ -28,10 +29,21 @@ public class GameService {
         this.playerRepository = playerRepository;
         this.gameResultRepository = gameResultRepository;
     }
+
     public Player registerPlayer(String firstName, String lastName) {
-        return playerRepository.findByFirstNameAndLastName(firstName, lastName)
-                .orElseGet(() -> playerRepository.save(new Player(firstName, lastName)));
+        Optional<Player> optionalPlayer = playerRepository.findByFirstNameAndLastName(firstName, lastName);
+        if (optionalPlayer.isPresent()) {
+            return optionalPlayer.get();
+        }
+        Player newPlayer = new Player(firstName, lastName);
+        playerRepository.save(newPlayer);
+        return newPlayer;
+
+        // sama asi lühemalt
+        // return playerRepository.findByFirstNameAndLastName(firstName, lastName)
+        //        .orElseGet(() -> playerRepository.save(new Player(firstName, lastName)));
     }
+
     public Game startGame(String firstName, String lastName) {
         this.currentPlayer = registerPlayer(firstName, lastName);
 
@@ -49,8 +61,8 @@ public class GameService {
 
     private List<Card> createShuffledDeck() {
         List<Card> deck = new ArrayList<>();
-        String[] suits = {"clubs", "hearts", "diamonds", "spades"};
-        String[] ranks = {"2","3","4","5","6","7","8","9","10","J","Q","K","A"};
+        String[] suits = {"Clubs", "Hearts", "Diamonds", "Spades"};
+        String[] ranks = {"2","3","4","5","6","7","8","9","10","Jack","Queen","King","Ace"};
 
         for (String suit : suits) {
             for (String rank : ranks) {
@@ -88,7 +100,6 @@ public class GameService {
                 endGame();
             }
         }
-
         game.setBaseCard(nextCard);
         return game;
     }

@@ -22,12 +22,5 @@ public class GameResult {
     //@JoinColumn(name = "player_id")
     private Player player;
 
-//    public GameResult() {}
-//
-//    public GameResult(Player player, int correctAnswers, long durationOfPlay) {
-//        this.player = player;
-//        this.correctAnswers = correctAnswers;
-//        this.durationOfPlay = durationOfPlay;
-//        this.startTime = LocalDateTime.now();
-//    }
+
 }
